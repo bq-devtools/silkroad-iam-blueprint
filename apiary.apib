@@ -122,6 +122,8 @@ Get user whose id is given as path parameter
 |phoneNumber|Telefone number of the user|String||
 |scopes|Scopes which are allowed for this user|Array[String]||
 |properties|Arbitrary properties which are stored by clients on the user object|Map[String, Object]||
+|createdDate|The timestamp indicating the time when the user was created|Timestamp||
+|createdBy|The name of the client that created the user|String||
 
 ###Errors###
 |Status|Error|Description|
@@ -195,8 +197,7 @@ The body of the request must contain a JSON representation of the user to be cre
 |phoneNumber|Telefone number of the user|String||
 |scopes|Scopes which are allowed for this user|Array[String]||
 |properties|Arbitrary properties which are stored by clients on the user object|Map[String, Object]||
-|createdDate|The timestamp indicating the time when the user was created|Timestamp||
-|createdBy|The name of the client that created the user|String||
+
 
 ###Errors###
 |Status|Error|Description|
