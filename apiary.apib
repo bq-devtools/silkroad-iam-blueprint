@@ -108,6 +108,67 @@ GET /oauth/token
 User
 The following is a section of resources related to users in the SilkRoad platfom
 --
+
+Get users from IAM filtered with the next posibilities (It is forbidden do query with domain field):
+
+###Parameters###
+|Name|Description|Type|Default|Required
+|----|-----------|----|:-----:|:------:|
+|api:query|A search query expressed in silkroad query language (documentaton [here](http://jira.mundoreader.com/confluence/display/SILKROAD/Resources+API+Query+language)).|String|||
+|api:pageSize|Number of result returned in the page|Integer > 0|10||
+|api:page|The page to be returned. Pages are zero-indexed|Integer >= 0|0||
+|api:sort|Results orders. JSON with field to order and direction, asc or desc (e.g. {"name":"asc"})|String|||
+
+###Fields###
+|Name|Description|Type|Required|
+|----|-----------|----|:------:|
+|id  |User identifier|String|*|
+|domain|Domain (id) that the user belongs to|String|*|
+|username|Username is an internal identifier of the user between its domain|String|*|
+|email|Email of the user|String|*|
+|firstName|First name|String||
+|lastName|Last name|String||
+|profileUrl|URL of the user profile (ususally this is a profile page on the domain or some social network)||
+|phoneNumber|Telefone number of the user|String||
+|scopes|Scopes which are allowed for this user|Array[String]||
+|properties|Arbitrary properties which are stored by clients on the user object|Map[String, Object]||
+|country| User's country | String||
+|createdDate|The timestamp indicating the time when the user was created|Timestamp||
+|createdBy|The name of the client that created the user|String||
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|404  |not_found|The user domain isn't the same as the domain authorization|
+|403  |scopes_not_allowed|If at least one of the specified scopes of the user are not allowed on its domain.|
+
+GET /user/
+> Accept: application/json
+< 200
+< Content-Type: application/json
+{
+    {
+    "id": "fdad3eaa19ddec84b397a9e9a2312262",
+    "domain": "silkroad",
+    "email": "alexander.deleon@bqreaders.com",
+    "username": "alexander.deleon@bqreaders.com",
+    "firstName": "alex",
+    "scopes": [],
+    "properties" : {}
+    }
+    {
+    "id": "asdas2324asfhnnq232ss432412293",
+    "domain": "silkroad",
+    "email": "cristian.delcerro@bqreaders.com",
+    "username": "cristian.delcerro@bqreaders.com",
+    "firstName": "cristian",
+    "scopes": [],
+    "properties" : {}
+    }
+}
+
+
+
 Get user whose id is given as path parameter
 ###Fields###
 |Name|Description|Type|Required|
