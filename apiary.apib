@@ -10,6 +10,11 @@ Authorization
 The following is a section of resources related to client authorization to the SilkRoad platfom
 --
 Generate an access token
+
+###Version###
+
+Avaliable from version 0.12.0
+
 ###Parameters###
 The body of the request must contain these form parameters
 
@@ -19,13 +24,17 @@ The body of the request must contain these form parameters
 |assertion|The serialized signed JWT that asserts the grant request (see JWT claims section below) |String|*|
 
 ###JWT claims###
-|Name|Description|Type|Required|
-|----|-----------|----|-----------|
-|iss|Client ID of the client making the request|String|*|
-|aud|It must always be 'http://iam.bqws.io'|String|*|
-|scope|Space separated list of scopes requested|String|*|
-|exp|Time when the requested access token must expired. It must be less than an hour from the time of this request|Timestamp (in seconds)|*|
-|prn|Username if the request if for a user access token *without* using OAuth|String||
+|Name|Description|Type|Required|Since version|
+|----|-----------|----|-----------|--------|
+|iss|Client ID of the client making the request|String|*||
+|aud|It must always be 'http://iam.bqws.io'|String|*||
+|scope|Space separated list of scopes requested|String|||
+|exp|Time when the requested access token must expired. Itmust be less than an hour from the time of this request|Timestamp (in seconds)|*||
+|prn|Username if the request if for a user access token *without* using OAuth|String|||
+|version|Client version of the client making the request|String|||
+|refresh_token|Refresh token to create a new access token (ignored when you send oauth authentication information)|String|||
+|request_domain|Domain id to log in with (only for domain authentication)|String||1.2.0|
+|device_id|Device identification |String||1.11.0|
 
 If the client is requesting a user access token using OAuth authentication, the JWT must include the following claims:
 
@@ -33,15 +42,25 @@ If the client is requesting a user access token using OAuth authentication, the 
 |----|-----------|----|-----------|
 |oauth.service|Service that will provide the authorization, e.g. facebook|String|*|
 |oauth.code|Code used in OAuth2 for exanging for a token |String|only if OAuth2|
+|oauth.access_token|Access token used in OAuth2 for authentication. WARNING!! It is not recommended to pass an access token directly from the client, the oauth.code claim should be used instead. |String||
 |oauth.redirect_uri|URI used by the client in OAuth2 to redirect the user when he does the login |String|only if OAuth2|
 |oauth.token|Token returned by OAuth1 server to the client when the user does the login |String|only if OAuth1|
 |oauth.verifier|Verifier returned by OAuth1 server to the client when the user does the login |String|only if OAuth1|
+
+If the client is requesting a user access token using Basic authentication, the JWT must include the following claims:
+
+|Name|Description|Type|Required|Since version|
+|----|-----------|----|--------|-------------|
+|basic_auth.username|User identification (Username or email) |String|*|1.10.0|
+|basic_auth.password|User password |String|*|1.10.0|
+
 
 ###Response fields###
 |Name|Description|Type|Required|
 |----|-----------|----|:------:|
 |accessToken  |Token granted for accessing SilkRoad APIs|String|*|
 |expiresAt| Epoch time (in millis) when the token expires|Long|*|
+|refreshToken  |Token granted for refresh access token SilkRoad APIs|String|
 
 ###Errors###
 |Status|Error|Description|
@@ -50,16 +69,23 @@ If the client is requesting a user access token using OAuth authentication, the 
 |400  |missing_oauth_params|If the code (for oauth2) or oauth_token and/or oauth_verifier (for oauth1) parameter is missing.|
 |401  |unauthorized|The grant request has not procceeded. This occurs if the signatire of the JWT is invalid, or at leats one of the requested scopes is not allowed for the client. |
 |401  |no_such_principal| The princial identified by the prn field of the JWT does not exists on the domain of the issuer. |
+|403  |unsupported_version| The client has a obsolete version, it's neccesary update it. |
 POST /oauth/token
 > Accept: application/json
 < 200
 < Content-Type: application/json
 {
     "accessToken":"valid-token", 
-    "expiresAt": 1385377605000
+    "expiresAt": 1385377605000,
+    "refreshToken": "refresh-token"
 }
 
 Generate an access token from al OAuth callback
+
+###Version###
+
+Avaliable from version 0.12.0
+
 ###Parameters###
 
 |Name|Description|Type|Required|
@@ -67,6 +93,7 @@ Generate an access token from al OAuth callback
 |grant_type|The type of the grant request. Only the *urn:ietf:params:oauth:grant-type:jwt-bearer* grant type is supported|String|*|
 |assertion|The serialized signed JWT that asserts the grant request* |String|*|
 |code|Code used in oAuth2 for exanging for a token |String|only if OAuth2|
+|access_token|Access token used in oAuth2 for authentication. WARNING!! It is not recommended to pass an access token directly from the client, the code parameter should be used instead. |String||
 |oauth_token|Token returned by OAuth1 server to the client when the user does the login |String|only if OAuth1|
 |oauth_verifier|Verifier returned by OAuth1 server to the client when the user does the login |String|only if OAuth1|
 
@@ -77,15 +104,17 @@ Generate an access token from al OAuth callback
 |----|-----------|----|-----------|
 |iss|Client ID of the client making the request|String|*|
 |aud|It must always be 'http://iam.bqws.io'|String|*|
-|scope|Space separated list of scopes requested|String|*|
+|scope|Space separated list of scopes requested|String||
 |exp|Time when the requested access token must expired. It must be less than an hour from the time of this request|Timestamp (in seconds)|*|
 |oauth.service|Service that will provide the authorization, e.g. facebook|String|*|
+|version|Client version of the client making the request|String||
 
 ###Response fields###
 |Name|Description|Type|Required|
 |----|-----------|----|:------:|
 |accessToken  |Token granted for accessing SilkRoad APIs|String|*|
 |expiresAt| Epoch time (in millis) when the token expires|Long|*|
+|refreshToken  |Token granted for refresh access token SilkRoad APIs|String|
 
 ###Errors###
 |Status|Error|Description|
@@ -94,15 +123,38 @@ Generate an access token from al OAuth callback
 |400  |missing_oauth_params|If the code (for oauth2) or oauth_token and/or oauth_verifier (for oauth1) parameter is missing.|
 |401  |unauthorized|The grant request has not procceeded. This occurs if the signatire of the JWT is invalid, or at leats one of the requested scopes is not allowed for the client. |
 |401  |no_such_principal| The princial identified by the prn field of the JWT does not exists on the domain of the issuer. |
+|403  |unsupported_version| The client has a obsolete version, it's neccesary update it. |
 GET /oauth/token
 > Accept: application/json
 < 200
 < Content-Type: application/json
 {
     "accessToken":"valid-token", 
-    "expiresAt": 1385377605000
+    "expiresAt": 1385377605000,
+    "refreshToken": "refresh-token"
 }
 
+Upgrade de assets of the token. This endpoint takes the token generated by /assets/access and add the assets scopes of the logged user to the current access token.
+
+###Version###
+
+Avaliable from version 0.16.0
+
+###Parameters###
+
+|Name|Description|Type|Required|
+|----|-----------|----|-----------|
+|grant_type|The type of the grant request. Only the *urn:ietf:params:oauth:grant-type:jwt-bearer* grant type is supported|String|*|
+|assertion|The token generated by assets module. |String|*|
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|400  |invalid_grant|The grant request is invalid. This occurs when *assertion* is missing, *grant_type* is missing or it is specified to an unsupported value.|
+|401  |unauthorized|If the isn't a logged user|
+GET /oauth/token/upgrade
+> Accept: application/json
+< 204
 
 --
 User
@@ -111,6 +163,10 @@ The following is a section of resources related to users in the SilkRoad platfom
 
 Get users from IAM. It is possible filtered with the next posibilities (It is forbidden do query with field: DOMAIN):
 
+###Version###
+
+Avaliable from version 0.12.0
+
 ###Parameters###
 |Name|Description|Type|Default|Required
 |----|-----------|----|:-----:|:------:|
@@ -118,7 +174,7 @@ Get users from IAM. It is possible filtered with the next posibilities (It is fo
 |api:pageSize|Number of result returned in the page|Integer > 0|10||
 |api:page|The page to be returned. Pages are zero-indexed|Integer >= 0|0||
 |api:sort|Results orders. JSON with field to order and direction, asc or desc (e.g. {"name":"asc"})|String|||
-
+|api:aggregation|An aggregation operation expressed in silkroad aggregation language (documentaton [here](https://confluence.bq.com/display/SILKROAD/Aggregation+language)).|String|||
 ###Fields###
 |Name|Description|Type|Required|
 |----|-----------|----|:------:|
@@ -130,7 +186,6 @@ Get users from IAM. It is possible filtered with the next posibilities (It is fo
 |lastName|Last name|String||
 |profileUrl|URL of the user profile (ususally this is a profile page on the domain or some social network)||
 |phoneNumber|Telefone number of the user|String||
-|scopes|Scopes which are allowed for this user|Array[String]||
 |properties|Arbitrary properties which are stored by clients on the user object|Map[String, Object]||
 |country| User's country | String||
 |createdDate|The timestamp indicating the time when the user was created|Timestamp||
@@ -170,6 +225,11 @@ GET /user/
 
 
 Get user whose id is given as path parameter
+
+###Version###
+
+Avaliable from version 0.12.0
+
 ###Fields###
 |Name|Description|Type|Required|
 |----|-----------|----|:------:|
@@ -207,7 +267,11 @@ GET /user/{id}
     "properties" : {}
 }
 
-Same as the */v1.0/user/{id}* endpoint but the user's id is implied from the access_token. If the access_token is not associated with any user a forbidden (403) status is returned. 
+Same as the */v1.0/user/{id}* endpoint but the user's id is implied from the access_token. 
+
+###Version###
+
+Avaliable from version 0.12.0
 
 ###Fields###
 |Name|Description|Type|Required|
@@ -228,8 +292,8 @@ Same as the */v1.0/user/{id}* endpoint but the user's id is implied from the acc
 
 ###Errors###
 |Status|Error|Description|
-|----|-----------|----|
-|403  |fobidden|If the access_token is not associated with any user|
+|----|------------|----|
+|401 |unauthorized|if the access_token is not associated with any user.
 
 GET /user/me
 > Accept: application/json
@@ -245,22 +309,29 @@ GET /user/me
     "properties" : {}
 }
 
+
 Add user
+
+###Version###
+
+Avaliable from version 0.13.0
 
 ###Parameters###
 The body of the request must contain a JSON representation of the user to be created. Only the following fields are allow on this representation:
 
-|Name|Description|Type|Required|
-|----|-----------|----|:------:|
-|username|Username is an internal identifier of the user between its domain|String|*|
-|email|Email of the user|String|*|
-|firstName|First name|String||
-|lastName|Last name|String||
-|profileUrl|URL of the user profile (ususally this is a profile page on the domain or some social network)||
-|phoneNumber|Telefone number of the user|String||
-|scopes|Scopes which are allowed for this user|Array[String]||
-|properties|Arbitrary properties which are stored by clients on the user object|Map[String, Object]||
-|country| User's country | String||
+|Name|Description|Type|Required|Version|
+|----|-----------|----|:------:|-------|
+|username|Username is an internal identifier of the user between its domain|String|*||
+|email|Email of the user|String|*||
+|password|Password of the user|String||1.10.0|
+|firstName|First name|String|||
+|lastName|Last name|String|||
+|profileUrl|URL of the user profile (ususally this is a profile page on the domain or some social network)|||
+|phoneNumber|Telefone number of the user|String|||
+|scopes|Scopes which are allowed for this user.Can be empty|Array[String]|*||
+|properties|Arbitrary properties which are stored by clients on the user object|Map[String, Object]|||
+|country| User's country | String|||
+|identity|Identity that belong to this user and corresponding to some oauth-server|Map[String, Object]|||
 
 
 ###Errors###
@@ -268,13 +339,15 @@ The body of the request must contain a JSON representation of the user to be cre
 |----|-----------|----|
 |422  |invalid_entity|One of the requiered parameters is missing.|
 |409  |entity_exists|When a user already exists with the the specified username and domain |
+|400|invalid_oauth_service|If the specified oauth service is invalid or not allowed in the domain.|
+|404|not_found|User id not found in IAM|
 |403  |scopes_not_allowed|If at least one of the specified scopes of the user are not allowed on its domain.|
+|409|identity_exists|The identity already exists| 
 POST /user
 > Accept: application/json
 > Content-Type: application/json
 {
   "firstName":"alex",
-  "domain": "silkroad",
   "email": "alexander.deleon@bqreaders.com",
   "username": "alexander.deleon@bqreaders.com"
 }
@@ -282,6 +355,10 @@ POST /user
 < Location: /user/123
 
 Update user
+
+###Version###
+
+Avaliable from version 0.12.0
 
 ###Parameters###
 The body of the request must contain a JSON representation of the user to be updated. Only the following fields are allow on this representation:
@@ -298,6 +375,7 @@ The body of the request must contain a JSON representation of the user to be upd
 |properties|Arbitrary properties which are stored by clients on the user object|Map[String, Object]||
 |country| User's country | String||
 
+
 ###Errors###
 |Status|Error|Description|
 |----|-----------|----|
@@ -311,16 +389,78 @@ PUT /user/{id}
   "firstName":"alex",
   "domain": "silkroad",
   "email": "alexander.deleon@bqreaders.com",
+  "username": "alexander.deleon@bqreaders.com",
+  "scopes": ["resources:music:read_catalog", "resources:music:edit_playlist"],
+}
+< 204
+
+
+Update user me
+
+###Version###
+
+Avaliable from version 0.21.0
+
+###Parameters###
+The body of the request must contain a JSON representation of the user to be updated. Only the following fields are allow on this representation:
+
+|Name|Description|Type|Required|
+|----|-----------|----|:------:|
+|username|Username is an internal identifier of the user between its domain|String||
+|email|Email of the user|String||
+|firstName|First name|String||
+|lastName|Last name|String||
+|profileUrl|URL of the user profile (ususally this is a profile page on the domain or some social network)||
+|phoneNumber|Telefone number of the user|String||
+|properties|Arbitrary properties which are stored by clients on the user object|Map[String, Object]||
+|country| User's country | String||
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401  |unauthorized|if the access_token is not associated with any user.
+
+
+PUT /user/me
+> Accept: application/json
+> Content-Type: application/json
+{
+  "firstName":"alex",
+  "domain": "silkroad",
+  "email": "alexander.deleon@bqreaders.com",
   "username": "alexander.deleon@bqreaders.com"
 }
 < 204
 
+User password reset
+
+###Version###
+
+Avaliable from version 1.10.0
+
+### Password reset 
+Clients can use this endpoint to generate and send e-mail to change password. For example:
+
+###Parameters###
+
+|Name|Description|Type|Required|Restrictions|
+|----|-----------|----|--------|-----------|
+|email|The existing email of the user|String|*|E-mail type|
+
+
+GET /user/resetPassword?email={email}
+< 200
 
 
 Delete user
 
 
 Request the termination of a user account. This operation is handled asynchronous so the request always returns status 204 (Accepted), even if the user does not exists.
+
+###Version###
+
+Avaliable from version 0.12.0
 
 ###Errors###
 |Status|Error|Description|
@@ -331,10 +471,96 @@ DELETE /user/{id}
 > Accept: application/json
 < 204
 
+
+Delete user me
+
+
+Request the termination of a user account. This operation is handled asynchronous so the request always returns status 204 (Accepted), even if the user does not exists.
+
+###Version###
+
+Avaliable from version 0.21.0
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401  |unauthorized|if the access_token is not associated with any user.
+
+DELETE /user/me
+> Accept: application/json
+< 204
+
+
+SignOut user 
+
+
+Sign Out the logged user. This operation is handled asynchronous so the request always returns status 204 (Accepted), even if the user does not exists.
+
+###Version###
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401  |unauthorized|if the access_token is not associated with any user.
+
+PUT /user/me/signout
+> Accept: application/json
+< 204
+
+
+
+Disconnect user 
+
+
+disconnect the user, all his tokens with id are deleted
+
+###Version###
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401  |unauthorized|if the access_token is not associated with any user.
+|404  |not_found|no exist any user with the user id specified.
+
+PUT /user/{id}/disconnect
+> Accept: application/json
+< 204
+
+
+Disconnect user 
+
+disconnect the user, all his tokens are deleted
+
+###Version###
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401  |unauthorized|if the access_token is not associated with any user.
+
+PUT /user/me/disconnect
+> Accept: application/json
+< 204
+
+--
+User Identities
+--
+
 Add identity.
 Add a new social identity to an existing user
 
+###Version###
+
+Avaliable from version 0.12.0
+
 ###Parameters###
+|Name|Description|Type|Required
+|----|-----------|----|:------:
+|id|User identification or me (me refers to actual user)|String|*
+
 Json body.
 
 |Name|Description|Type|Required|
@@ -358,3 +584,629 @@ POST /user/{id}/identity
     "oAuthId":"12435"
 }
 < 201
+
+Get identities.
+Get social identities of an existing user
+
+###Version###
+
+Avaliable from version 0.16.0
+
+###Parameters###
+|Name|Description|Type|Required
+|----|-----------|----|:------:
+|id|User identification or me (me refers to actual user)|String|*
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|400|invalid_oauth_service|If the specified oauth service is invalid or not allowed in the domain.|
+|404|not_found|User id not found in IAM|
+
+GET /user/{id}/identity
+> Accept: application/json
+< 200
+< Content-Type: application/json
+[{
+    "oAuthService":"silkroad",
+    "oAuthId":"12435",
+    "username":"myUsername",
+    "domain":"SilkroadDomain"
+},{
+    "oAuthService":"facebook",
+    "oAuthId":"545464",
+    "username":"myUsername",
+    "domain":"SilkroadDomain"
+}
+]
+
+--
+Username  
+--
+
+This endpoint allows check username availability 
+
+###Version###
+
+Avaliable from version 1.6.0
+
+###Parameters###
+|Name|Description|Type|Required
+|----|-----------|----|:------:
+|username|Username to check|String|*
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|404|not_found|Username not found in IAM|
+ 
+
+HEAD /username/{username}
+> Accept: application/json
+> Content-type: application/json
+< 200
+
+
+This endpoint returns user's id for a given username. 
+
+###Version###
+
+Avaliable from version 1.20.0
+
+###Parameters###
+|Name|Description|Type|Required
+|----|-----------|----|:------:
+|username|Username to check|String|*
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|404|not_found|Username not found in IAM|
+ 
+
+GET /username/{username}
+> Accept: application/json
+> Content-type: application/json
+< 200
+
+
+--
+Email  
+--
+
+This endpoint allows check email availability 
+
+###Version###
+
+Avaliable from version 1.20.0
+
+###Parameters###
+|Name|Description|Type|Required
+|----|-----------|----|:------:
+|email|Email to check|String|*
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|404|not_found|Email not found in IAM|
+ 
+
+HEAD /email/{email}
+> Accept: application/json
+> Content-type: application/json
+< 200
+
+
+This endpoint returns user's id for a given email. 
+
+###Version###
+
+Avaliable from version 1.20.0
+
+###Parameters###
+|Name|Description|Type|Required
+|----|-----------|----|:------:
+|email|Email to check|String|*
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|404|not_found|Email not found in IAM|
+ 
+
+GET /email/{email}
+> Accept: application/json
+> Content-type: application/json
+< 200
+
+--
+User Profile
+--
+
+Gets the profile of an existing user. The fields included in the profile are defined by domain
+
+###Version###
+
+Avaliable from version 1.7.0
+
+###Parameters###
+|Name|Description|Type|Required
+|----|-----------|----|:------:
+|id|User identification or me (me refers to actual user)|String|*
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|404|not_found|User id not found in IAM|
+
+GET /user/{id}/profile
+> Accept: application/json
+< 200
+< Content-Type: application/json
+{
+    "username":"myUsername",
+    "email":"foo@foo.com",
+    "firstName":"name",
+    "lastName":"surname"
+}
+
+--
+User Profiles
+--
+
+Gets the profile of an existing user. The fields included in the profile are defined by domain
+
+###Version###
+
+Avaliable from version 1.8.0
+
+###Parameters###
+|Name|Description|Type|Default|Required
+|----|-----------|----|:-----:|:------:|
+|api:query|A search query expressed in silkroad query language (documentaton [here](http://jira.mundoreader.com/confluence/display/SILKROAD/Resources+API+Query+language)).|String|||
+|api:pageSize|Number of result returned in the page|Integer > 0|10||
+|api:page|The page to be returned. Pages are zero-indexed|Integer >= 0|0||
+|api:sort|Results orders. JSON with field to order and direction, asc or desc (e.g. {"name":"asc"})|String|||
+|api:aggregation|An aggregation operation expressed in silkroad aggregation language (documentaton [here](https://confluence.bq.com/display/SILKROAD/Aggregation+language)).|String|||
+###Fields###
+|Name|Description|Type|Required|
+|----|-----------|----|:------:|
+|username|Username is an internal identifier of the user between its domain|String||
+|email|Email of the user|String||
+|firstName|First name|String||
+|lastName|Last name|String||
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|404  |not_found|The user domain isn't the same as the domain authorization|
+|403  |scopes_not_allowed|If at least one of the specified scopes of the user are not allowed on its domain.|
+
+GET /user/profile
+> Accept: application/json
+< 200
+< Content-Type: application/json
+{
+    "username":"myUsername",
+    "email":"foo@foo.com",
+    "firstName":"name",
+    "lastName":"surname"
+}
+
+--
+User Reset Password
+--
+
+Clients can use this endpoint to generate and send e-mail to change password. Requests must use [Basic HTTP Authentication](http://tools.ietf.org/html/rfc2617#section-2) to provide client_id and client_secret. For example:
+
+###Version###
+
+Avaliable from version 1.12.0
+
+###Parameters###
+|Name|Description|Type|Required|Restrictions|
+|----|-----------|----|--------|-----------|
+|email|The existing email of the user|String|*|E-mail type|
+
+
+###Errors###
+|Status|Error|Description|
+|------|-----|-----------|
+|404   |not_found|If the no user have been found with given email.|
+
+GET /user/resetPassword
+> Accept: application/json
+< 200
+
+
+--
+Devices
+--
+
+###Version###
+
+Avaliable from version 1.11.0
+
+###Parameters###
+|Name|Description|Type|Required
+|----|-----------|----|:------:
+|id|User identification or me (me refers to actual user)|String|*
+|Device id|Device identification|String|*
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|404|not_found|Device id not found in IAM|
+|401|unauthorized|if the access_token is not associated with any user.
+|400|missing_uid_params|uid parameter is missing.|
+
+GET /user/{userId}/devices
+> Accept: application/json
+< 200
+< Content-Type: application/json
+[{
+    "domain": "myDomain",
+    "userId": "userId",
+    "uid"   : "DeviceUID",
+    "notificationUri" : "Token",
+    "name"  : "deviceName",
+    "type"  : "Android",
+    "notificationEnabled" :true
+},
+{
+    "domain": "myDomain",
+    "userId": "userId",
+    "uid"   : "DeviceUID",
+    "notificationUri" : "Token",
+    "name"  : "deviceName",
+    "type"  : "Apple",
+    "notificationEnabled" :true
+}
+]
+
+GET /user/{userId}/devices/{deviceId}
+> Accept: application/json
+< 200
+< Content-Type: application/json
+{
+    "domain": "myDomain",
+    "userId": "userId",
+    "uid"   : "DeviceUID",
+    "notificationUri" : "Token",
+    "name"  : "deviceName",
+    "type"  : "Android",
+    "notificationEnabled" :true
+}
+
+Same as the */v1.0/user/{id}*/devices endpoint but the user's id is implied from the access_token
+
+GET /user/me/devices/{deviceId}
+> Accept: application/json
+< 200
+< Content-Type: application/json
+{
+    "domain": "myDomain",
+    "userId": "userId",
+    "uid"   : "DeviceUID",
+    "notificationUri" : "Token",
+    "name"  : "deviceName",
+    "type"  : "Android",
+    "notificationEnabled" :true
+}
+
+GET /user/me/devices
+> Accept: application/json
+< 200
+< Content-Type: application/json
+{
+    "domain": "myDomain",
+    "userId": "userId",
+    "uid"   : "DeviceUID",
+    "notificationUri" : "Token",
+    "name"  : "deviceName",
+    "type"  : "Android",
+    "notificationEnabled" :true
+}
+
+PUT /user/{userId}/devices
+> Accept: application/json
+> Content-Type: application/json
+{
+    "uid"   : "DeviceUID",
+    "notificationUri" : "Token",
+    "name"  : "deviceName",
+    "type"  : "Apple",
+    "notificationEnabled" :true
+}
+< 201
+
+
+PUT /user/me/devices
+> Accept: application/json
+> Content-Type: application/json
+{
+    "uid"   : "DeviceUID",
+    "notificationUri" : "Token",
+    "name"  : "deviceName",
+    "type"  : "Apple",
+    "notificationEnabled" :true
+}
+< 201
+
+DELETE /user/{userId}/devices/{deviceId}
+< 204
+
+DELETE /user/me/devices/{deviceId}
+< 204
+
+--
+Administration
+This endpoint manages the administration operational operations.
+--
+
+
+Creates a new domain.
+
+###Parameters###
+
+The body of the request must contain a JSON representation of the domain to be created. Allowed parameters as domain properties:
+
+
+|Name|Description|Type|Required
+|----|-----------|----|:------:
+|id|Domain id.|String|*
+|description|Description of the domain.|String|
+|authUrl|Authentication url.|String|
+|allowedDomains|Allowed domains.|String|
+|scopes|Scopes of the domain.|Array|
+|defaultScopes|Default scopes applied on user creation on the domain.|Array|
+|authConfigurations|Authentication configuration.|Object|
+|userProfileFields|Allowed user profile fields.|Array|
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|400|bad_request|Invalid information supplied|
+|401|unauthorized|access_token not authorized to make the operation.|
+|422|unprocessable entity|Malformed json sent.|
+
+POST /domain
+> Accept: application/json
+< 201
+
+
+Gets the information of a domain.
+
+###Fields###
+|Name|Description|Type|
+|----|-----------|----|
+|id|Domain id.|String|
+|description|Description of the domain.|String|
+|authUrl|Authentication url.|String|
+|allowedDomains|Allowed domains.|String|
+|scopes|Scopes of the domain.|Array|
+|defaultScopes|Default scopes applied on user creation on the domain.|Array|
+|authConfigurations|Authentication configuration.|Object|
+|userProfileFields|Allowed user profile fields.|Array|
+|createdDate|The timestamp indicating the time when the domain was created|Timestamp|
+|createdBy|The name of the client that created the domain|String|
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|400|bad_request|Invalid supplied information|
+|401|unauthorized|access_token not authorized to make the operation.|
+|404|not_found|Domain not found in IAM|
+
+GET /domain/{domainId}
+> Content-Type: application/json
+< 200
+
+
+Updates a domain.
+
+###Parameters###
+
+The body of the request must contain a JSON representation of the domain to be created. Allowed parameters to be updated:
+
+|Name|Description|Type|
+|----|-----------|----|
+|description|Description of the domain.|String|
+|authUrl|Authentication url.|String|
+|allowedDomains|Allowed domains.|String|
+|scopes|Scopes of the domain.|Array|
+|defaultScopes|Default scopes applied on user creation on the domain.|Array|
+|authConfigurations|Authentication configuration.|Object|
+|userProfileFields|Allowed user profile fields.|Array|
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|400|bad_request|Invalid supplied information|
+|401|unauthorized|access_token not authorized to make the operation.|
+|404|not_found|Domain not found in IAM|
+|422|unprocessable entity|Malformed json sent.|
+
+PUT /domain/{domainId}
+> Accept: application/json
+< 204
+
+
+Removes a domain.
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401|unauthorized|access_token not authorized to make the operation.|
+
+
+DELETE /domain/{domainId}
+< 204
+
+
+Adds a new client.
+
+###Parameters###
+
+The body of the request must contain a JSON representation of the client to be created. Allowed parameters:
+
+|Name|Description|Type|Required
+|----|-----------|----|:--------:|
+|id|Client id.|String||
+|name|Client Name.|String|*|
+|domain|Domain for the client.|String|*|
+|key|Client key.|String|*|
+|version|Client version.|String||
+|signatureAlgorithm|Signature algorithm.|String||
+|scopes|Scopes of the client.|Object||
+|clientSideAuthentication|Option for client side authentication.|Boolean||
+|resetUrl|Reset password url.|String||
+|resetNotificationId|Reset password notification id.|String||
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|400|bad_request|Invalid information supplied.|
+|401|unauthorized|access_token not authorized to make the operation.|
+|422|unprocessable entity|Malformed json sent.|
+
+POST /domain/{domainId}/client
+> Accept: application/json
+< 201
+
+
+Gets a client.
+
+###Fields###
+|Name|Description|Type|
+|----|-----------|----|
+|id|Client id.|String|
+|name|Client Name.|String|
+|domain|Domain for the client.|String|
+|key|Client key.|String|
+|version|Client version.|String|
+|signatureAlgorithm|Signature algorithm.|String|
+|scopes|Scopes of the client.|Object|
+|clientSideAuthentication|Option for client side authentication.|Boolean|
+|resetUrl|Reset password url.|String|
+|resetNotificationId|Reset password notification id.|String|
+|createdDate|The timestamp indicating the time when the client was created|Timestamp|
+|createdBy|The name of the client that created the client|String|
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401|unauthorized|access_token not authorized to make the operation.|
+|404|not_found|Client not found.|
+
+
+GET /domain/{domainId}/client/{clientId}
+> Content-Type: application/json
+< 200
+
+
+Updates a client.
+
+###Parameters###
+
+The body of the request must contain a JSON representation of the client to be created. Allowed parameters to be updated:
+
+|Name|Description|Type|Required
+|----|-----------|----|:------:
+|name|Client Name.|String|
+|domain|Domain for the client.|String|
+|key|Client key.|String|
+|version|Client version.|String|
+|signatureAlgorithm|Signature algorithm.|String|
+|scopes|Scopes of the client.|Object|
+|clientSideAuthentication|Option for client side authentication.|Boolean|
+|resetUrl|Reset password url.|String|
+|resetNotificationId|Reset password notification id.|String|
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|400|bad_request|Invalid information supplied.|
+|401|unauthorized|access_token not authorized to make the operation.|
+|404|not_found|Client not found.|
+
+PUT /domain/{domainId}/client/{clientId}
+> Accept: application/json
+< 204
+
+
+Removes a client.
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401|unauthorized|access_token not authorized to make the operation.|
+
+DELETE /domain/{domainId}/client/{clientId}
+< 204
+
+
+Creates a new scope.
+
+###Parameters###
+
+The body of the request must contain a JSON representation of the scope to be created. Allowed parameters:
+
+|Name|Description|Type|Required|
+|----|-----------|----|:------:|
+|id|Scope id.|String||
+|rules|Scope rules.|Object||
+|type|Scope type.|String|*|
+|scopes|Scopes for a composite scope.|Object||
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|400|bad_request|Invalid information supplied.|
+|401|unauthorized|access_token not authorized to make the operation.|
+|422|unprocessable entity|Malformed json sent.|
+
+POST /scope
+> Accept: application/json
+< 201
+
+
+Gets a scope
+
+###Fields###
+
+|Name|Description|Type|
+|----|-----------|----|
+|id|Scope id.|String|
+|rules|Scope rules.|Object|
+|type|Scope type.|String|
+|scopes|Scopes for a composite scope.|Object|
+|createdDate|The timestamp indicating the time when the scope was created.|Timestamp|
+|createdBy|The name of the client that created the scope.|String|
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401|unauthorized|access_token not authorized to make the operation.|
+|404|not_found|Scope not found.|
+
+GET /scope/{scopeId}
+> Content-Type: application/json
+< 200
+
+
+Removes a scope.
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401|unauthorized|access_token not authorized to make the operation.|
+
+DELETE /scope/{scopeId}
+< 204
