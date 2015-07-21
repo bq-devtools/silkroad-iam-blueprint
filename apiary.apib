@@ -1210,3 +1210,29 @@ Removes a scope.
 
 DELETE /scope/{scopeId}
 < 204
+
+
+--
+Groups
+The following is a section of groups that users can belong in the SilkRoad platfom
+--
+
+Put groups to a user. 
+###Version###
+
+Avaliable from version 1.21.0
+
+###Parameters###
+|Name|Description|Type|Default|Required
+|----|-----------|----|:-----:|:------:|
+|groups|user have the same features|String||*|
+
+
+###Errors###
+|Status|Error|Description|
+|------|---------------|----|
+ 404	not_found	The user domain isn't the same as the domain authorization
+
+PUT /user/{id}/groups
+> Accept: application/json
+< 204
