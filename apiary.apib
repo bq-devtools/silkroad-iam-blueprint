@@ -1244,5 +1244,63 @@ Removes a group to a user.
 |----|-----------|----|
 |401|unauthorized|access_token not authorized to make the operation.|
 
+
 DELETE /user/{id}/groups/{groupId}
+< 204
+
+Creates a new users group.
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401|unauthorized|access_token not authorized to make the operation.|
+|409|conflict|Group already exists.|
+
+
+POST /group
+> Accept: application/json
+< 201
+
+Updates the scopes of a users group.
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401|unauthorized|access_token not authorized to make the operation.|
+|404|not_found|Group not exists.|
+
+
+PUT /group/{id}
+> Accept: application/json
+< 204
+
+Gets a group.
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401|unauthorized|access_token not authorized to make the operation.|
+|404|not_found|Group not exists.|
+
+
+GET /group/{id}
+> Content-Type: application/json
+< 200
+
+Gets all groups of the current domain.
+
+
+GET /group
+> Content-Type: application/json
+< 200
+
+Deletes a users group.
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401|unauthorized|access_token not authorized to make the operation.|
+
+
+DELETE /group/{id}
 < 204
