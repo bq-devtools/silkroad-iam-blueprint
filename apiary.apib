@@ -1222,22 +1222,27 @@ Add groups to a user.
 Avaliable from version 1.21.0
 
 ###Parameters###
-|Name|Description|Type|Default|Required
-|----|-----------|----|:-----:|:------:|
-|groups|users have the same features|String||*|
+|Name|Description|Type|Required
+|----|-----------|----|:------:|
+|groups|the groups to add to user|Array[String]|*|
 
 
 ###Errors###
 |Status|Error|Description|
 |----|-----------|----|
 |404|not_found|The user domain isn't the same as the domain authorization|
+|401|unauthorized|access_token not authorized to make the operation.|
 
 
 PUT /user/{id}/groups
 > Accept: application/json
 < 204
 
-Removes a group to a user.
+Removes a group to an user.
+
+###Version###
+
+Avaliable from version 1.21.0
 
 ###Errors###
 |Status|Error|Description|
