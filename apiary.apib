@@ -1222,15 +1222,16 @@ Add groups to a user.
 Avaliable from version 1.21.0
 
 ###Parameters###
-|Name|Description|Type|Default|Required
-|----|-----------|----|:-----:|:------:|
-|groups|users have the same features|Array||*|
+|Name|Description|Type|Required
+|----|-----------|----|:------:|
+|groups|the groups to add to user|Array||*|
 
 
 ###Errors###
 |Status|Error|Description|
 |----|-----------|----|
 |404|not_found|The user domain isn't the same as the domain authorization|
+|401|unauthorized|access_token not authorized to make the operation.|
 
 
 PUT /user/{id}/groups
