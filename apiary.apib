@@ -1214,9 +1214,10 @@ DELETE /scope/{scopeId}
 
 --
 Groups
-The following is a section of groups that users can belong in the SilkRoad platfom
+The following is a section of groups that users can belong in the SilkRoad platform
 --
-Add groups to a user. 
+
+Add groups to an user. 
 ###Version###
 
 Avaliable from version 1.21.0
@@ -1224,21 +1225,22 @@ Avaliable from version 1.21.0
 ###Parameters###
 |Name|Description|Type|Required
 |----|-----------|----|:------:|
-|groups|the groups to add to user|Array[String]|*|
+|groups|the groups to add to the user|Array[String]|*|
 
 
 ###Errors###
 |Status|Error|Description|
 |----|-----------|----|
-|404|not_found|The user domain isn't the same as the domain authorization|
+|404|not_found|The user doesn't exist|
 |401|unauthorized|access_token not authorized to make the operation.|
+|404|not_found|User not exists.|
 
 
 PUT /user/{id}/groups
 > Accept: application/json
 < 204
 
-Add a group to an user.
+Remove a group to an user.
 
 ###Version###
 
@@ -1248,12 +1250,13 @@ Avaliable from version 1.21.0
 |Status|Error|Description|
 |----|-----------|----|
 |401|unauthorized|access_token not authorized to make the operation.|
+|404|not_found|User not exists.|
 
 
 DELETE /user/{id}/groups/{groupId}
 < 204
 
-Removes a group to an user.
+Create a group in the current domain
 
 ###Request fields###
 |Name|Description|Type|Required|
@@ -1273,6 +1276,11 @@ POST /group
 < 201
 
 Add an array of scopes to a users group.
+
+###Parameters###
+|Name|Description|Type|Required
+|----|-----------|----|:------:|
+|scopes|the scopes to add to the group|Array[String]|*|
 
 ###Errors###
 |Status|Error|Description|
@@ -1294,17 +1302,9 @@ Remove a scope from a users group.
 |404|not_found|Group not exists.|
 
 
-DELETE /group/{id}/scopes/{scope}
+DELETE /group/{id}/scopes/{scopeId}
 > Accept: application/json
 < 204
-
-Gets a group.
-
-###Errors###
-|Status|Error|Description|
-|----|-----------|----|
-|401|unauthorized|access_token not authorized to make the operation.|
-|404|not_found|Group not exists.|
 
 Gets a group.
 
@@ -1329,13 +1329,10 @@ GET /group/{id}
 
 Gets all groups of the current domain (array).
 
-###Response fields###
-|Name|Description|Type|
+###Errors###
+|Status|Error|Description|
 |----|-----------|----|
-|id|Group id|String|
-|name|Group name|String|
-|domain|Group domain|String|
-|scopes|Group scopes|Array|
+|401|unauthorized|access_token not authorized to make the operation.|
 
 
 GET /group
