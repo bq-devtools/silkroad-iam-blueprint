@@ -1222,16 +1222,15 @@ Add groups to a user.
 Avaliable from version 1.21.0
 
 ###Parameters###
-|Name|Description|Type|Required
-|----|-----------|----|:------:|
-|groups|the groups to add to user|Array|*|
+|Name|Description|Type|Default|Required
+|----|-----------|----|:-----:|:------:|
+|groups|users have the same features|String||*|
 
 
 ###Errors###
 |Status|Error|Description|
 |----|-----------|----|
 |404|not_found|The user domain isn't the same as the domain authorization|
-|401|unauthorized|access_token not authorized to make the operation.|
 
 
 PUT /user/{id}/groups
@@ -1251,6 +1250,12 @@ DELETE /user/{id}/groups/{groupId}
 
 Creates a new users group.
 
+###Request fields###
+|Name|Description|Type|Required|
+|----|-----------|----|--------|
+|name|Group name|String|*|
+|scopes|Group scopes|Array|
+
 ###Errors###
 |Status|Error|Description|
 |----|-----------|----|
@@ -1262,7 +1267,7 @@ POST /group
 > Accept: application/json
 < 201
 
-Add scopes to a users group.
+Add an array of scopes to a users group.
 
 ###Errors###
 |Status|Error|Description|
@@ -1271,11 +1276,11 @@ Add scopes to a users group.
 |404|not_found|Group not exists.|
 
 
-PUT /group/{id}/addScopes
+PUT /group/{id}/scopes
 > Accept: application/json
 < 204
 
-Remove scopes from a users group.
+Remove a scope from a users group.
 
 ###Errors###
 |Status|Error|Description|
@@ -1284,7 +1289,7 @@ Remove scopes from a users group.
 |404|not_found|Group not exists.|
 
 
-PUT /group/{id}/removeScopes
+DELETE /group/{id}/scopes/{scope}
 > Accept: application/json
 < 204
 
@@ -1297,6 +1302,14 @@ Gets a group.
 |404|not_found|Group not exists.|
 
 Gets a group.
+
+###Response fields###
+|Name|Description|Type|
+|----|-----------|----|
+|id|Group id|String|
+|name|Group name|String|
+|domain|Group domain|String|
+|scopes|Group scopes|Array|
 
 ###Errors###
 |Status|Error|Description|
@@ -1309,7 +1322,15 @@ GET /group/{id}
 > Content-Type: application/json
 < 200
 
-Gets all groups of the current domain.
+Gets all groups of the current domain (array).
+
+###Response fields###
+|Name|Description|Type|
+|----|-----------|----|
+|id|Group id|String|
+|name|Group name|String|
+|domain|Group domain|String|
+|scopes|Group scopes|Array|
 
 
 GET /group
