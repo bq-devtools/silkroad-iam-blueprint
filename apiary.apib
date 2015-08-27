@@ -1019,6 +1019,10 @@ GET /domain/{domainId}
     ]
 }
 
+
+
+Get all domains
+
 GET /domain 
 > Content-Type: application/json
 < 200
@@ -1144,6 +1148,8 @@ Gets a client.
 |404|not_found|Client not found.|
 
 
+
+
 GET /domain/{domainId}/client/{clientId}
 > Content-Type: application/json
 < 200
@@ -1161,6 +1167,10 @@ GET /domain/{domainId}/client/{clientId}
     createdDate: ISODate("2015-08-27T08:20:30.121Z"),
     createdBy: "IamSell on integration-app.dev"
 }
+
+
+
+Get all clients in a domain
 
 GET /domain/{domainId}/client
 > Content-Type: application/json
