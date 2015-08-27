@@ -1147,6 +1147,55 @@ Gets a client.
 GET /domain/{domainId}/client/{clientId}
 > Content-Type: application/json
 < 200
+{
+    _id: "234355",
+    domain: "domain-app",
+    name: "test-client-app",
+    key: "90f6ed907ce7e2426e513352a18470195f4eb04725beb41569db3f796a018dbd",
+    version: ">=0.0.1",
+    signatureAlgorithm: "HS256",
+    scopes: [
+        "app:client"
+    ],
+    clientSideAuthentication: true,
+    createdDate: ISODate("2015-08-27T08:20:30.121Z"),
+    createdBy: "IamSell on integration-app.dev"
+}
+
+GET /domain/{domainId}/client
+> Content-Type: application/json
+< 200
+{
+    {  
+        _id: "234355",
+        domain: "domain-app",
+        name: "test-client-app",
+        key: "90f6ed907ce7e2426e513352a18470195f4eb04725beb41569db3f796a018dbd",
+        version: ">=0.0.1",
+        signatureAlgorithm: "HS256",
+        scopes: [
+            "app:client"
+        ],
+        clientSideAuthentication: true,
+        createdDate: ISODate("2015-08-27T08:20:30.121Z"),
+        createdBy: "IamSell on integration-app.dev"
+    },
+    {
+        _id: "123355",
+        domain: "domain-app1",
+        name: "test-client-app1",
+        key: "1234907ce7e2421343352a18470195f4eb04725beb41569db3f796a018dbd",
+        version: ">=0.0.1",
+        signatureAlgorithm: "HS256",
+        scopes: [
+            "app1:client"
+        ],
+        clientSideAuthentication: true,
+        createdDate: ISODate("2015-08-27T08:20:30.121Z"),
+        createdBy: "IamSell on integration-app1.dev"
+    }
+}
+
 
 
 Updates a client.
