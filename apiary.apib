@@ -1382,7 +1382,7 @@ Add an array of scopes to a users group.
 |Status|Error|Description|
 |----|-----------|----|
 |401|unauthorized|access_token not authorized to make the operation.|
-|404|not_found|Group not exists.|
+|404|group_not_exists|Group not exists.|
 
 
 PUT /group/{id}/scopes
@@ -1395,7 +1395,7 @@ Remove a scope from a users group.
 |Status|Error|Description|
 |----|-----------|----|
 |401|unauthorized|access_token not authorized to make the operation.|
-|404|not_found|Group not exists.|
+|404|group_not_exists|Group not exists.|
 
 
 DELETE /group/{id}/scopes/{scopeId}
@@ -1416,7 +1416,7 @@ Gets a group.
 |Status|Error|Description|
 |----|-----------|----|
 |401|unauthorized|access_token not authorized to make the operation.|
-|404|not_found|Group not exists.|
+|404|group_not_exists|Group not exists.|
 
 
 GET /group/{id}
