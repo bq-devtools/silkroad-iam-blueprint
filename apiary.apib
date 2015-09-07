@@ -978,7 +978,8 @@ The body of the request must contain a JSON representation of the domain to be c
 |----|-----------|----|
 |400|bad_request|Invalid information supplied|
 |401|unauthorized|access_token not authorized to make the operation.|
-|422|unprocessable entity|Malformed json sent.|
+|409|entity_exists|The domain already exists.|
+|422|invalid_entity|Malformed json sent.|
 
 POST /domain
 > Accept: application/json
@@ -1026,6 +1027,11 @@ GET /domain/{domainId}
 
 
 Get all domains
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|400|invalid_query|Invalid query supplied|
 
 GET /domain 
 > Content-Type: application/json
@@ -1077,7 +1083,7 @@ The body of the request must contain a JSON representation of the domain to be c
 |400|bad_request|Invalid supplied information|
 |401|unauthorized|access_token not authorized to make the operation.|
 |404|not_found|Domain not found in IAM|
-|422|unprocessable entity|Malformed json sent.|
+|422|invalid_entity|Malformed json sent.|
 
 PUT /domain/{domainId}
 > Accept: application/json
@@ -1120,7 +1126,7 @@ The body of the request must contain a JSON representation of the client to be c
 |----|-----------|----|
 |400|bad_request|Invalid information supplied.|
 |401|unauthorized|access_token not authorized to make the operation.|
-|422|unprocessable entity|Malformed json sent.|
+|422|invalid_entity|Malformed json sent.|
 
 POST /domain/{domainId}/client
 > Accept: application/json
@@ -1271,7 +1277,7 @@ The body of the request must contain a JSON representation of the scope to be cr
 |----|-----------|----|
 |400|bad_request|Invalid information supplied.|
 |401|unauthorized|access_token not authorized to make the operation.|
-|422|unprocessable entity|Malformed json sent.|
+|422|invalid_entity|Malformed json sent.|
 
 POST /scope
 > Accept: application/json
