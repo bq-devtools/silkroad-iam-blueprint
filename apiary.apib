@@ -544,6 +544,55 @@ PUT /user/me/disconnect
 > Accept: application/json
 < 204
 
+
+
+Close all user sessions
+
+All user tokens with id are delete, but all user refresh tokens are not deleted
+
+###Version###
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401  |unauthorized|if the access_token is not associated with any user.
+
+DELETE /user/{id}/sessions
+> Accept: application/json
+< 204
+
+
+Close all user sessions
+
+All user tokens are delete, but all user refresh tokens are not deleted
+
+###Version###
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401  |unauthorized|if the access_token is not associated with any user.
+
+DELETE /user/me/sessions
+> Accept: application/json
+< 204
+
+Retrieves current user's session
+
+###Version###
+
+
+###Errors###
+|Status|Error|Description|
+|----|-----------|----|
+|401  |unauthorized|if the access_token is not associated with any user.
+
+GET /user/me/session
+> Accept: application/json
+< 200
+
 --
 User Identities
 --
@@ -847,49 +896,48 @@ Avaliable from version 1.11.0
 |----|-----------|----|
 |404|not_found|Device id not found in IAM|
 |401|unauthorized|if the access_token is not associated with any user.
-|400|missing_uid_params|uid parameter is missing.|
 
-GET /user/{userId}/devices
+GET /user/{userId}/device
 > Accept: application/json
 < 200
 < Content-Type: application/json
 [{
-    "domain": "myDomain",
-    "userId": "userId",
-    "uid"   : "DeviceUID",
+    "id"   : "DeviceUID",
     "notificationUri" : "Token",
     "name"  : "deviceName",
-    "type"  : "Android",
-    "notificationEnabled" :true
+    "type"  : "ANDROID",
+    "notificationEnabled" :true,
+    "firstConnection": "2012-04-23T18:25:43.511Z",
+    "lastConnection": "2015-04-23T18:25:43.511Z",
 },
 {
-    "domain": "myDomain",
-    "userId": "userId",
-    "uid"   : "DeviceUID",
+    "id"   : "DeviceUID",
     "notificationUri" : "Token",
     "name"  : "deviceName",
-    "type"  : "Apple",
-    "notificationEnabled" :true
+    "type"  : "APPLE",
+    "notificationEnabled" :true,
+    "firstConnection": "2012-04-23T18:25:43.511Z",
+    "lastConnection": "2015-04-23T18:25:43.511Z",
 }
 ]
 
-GET /user/{userId}/devices/{deviceId}
+GET /user/{userId}/device/{id}
 > Accept: application/json
 < 200
 < Content-Type: application/json
 {
-    "domain": "myDomain",
-    "userId": "userId",
-    "uid"   : "DeviceUID",
+    "id"   : "DeviceUID",
     "notificationUri" : "Token",
     "name"  : "deviceName",
-    "type"  : "Android",
-    "notificationEnabled" :true
+    "type"  : "APPLE",
+    "notificationEnabled" :true,
+    "firstConnection": "2012-04-23T18:25:43.511Z",
+    "lastConnection": "2015-04-23T18:25:43.511Z",
 }
 
 Same as the */v1.0/user/{id}*/devices endpoint but the user's id is implied from the access_token
 
-GET /user/me/devices/{deviceId}
+GET /user/me/device/{id}
 > Accept: application/json
 < 200
 < Content-Type: application/json
@@ -917,35 +965,33 @@ GET /user/me/devices
     "notificationEnabled" :true
 }
 
-PUT /user/{userId}/devices
+PUT /user/{userId}/device/{id}
 > Accept: application/json
 > Content-Type: application/json
 {
-    "uid"   : "DeviceUID",
     "notificationUri" : "Token",
     "name"  : "deviceName",
-    "type"  : "Apple",
+    "type"  : "APPLE",
     "notificationEnabled" :true
 }
 < 201
 
 
-PUT /user/me/devices
+PUT /user/me/device/{id}
 > Accept: application/json
 > Content-Type: application/json
 {
-    "uid"   : "DeviceUID",
     "notificationUri" : "Token",
     "name"  : "deviceName",
-    "type"  : "Apple",
+    "type"  : "APPLE",
     "notificationEnabled" :true
 }
 < 201
 
-DELETE /user/{userId}/devices/{deviceId}
+DELETE /user/{userId}/device/{id}
 < 204
 
-DELETE /user/me/devices/{deviceId}
+DELETE /user/me/device/{id}
 < 204
 
 --
@@ -1379,6 +1425,11 @@ Create a group in the current domain
 
 POST /group
 > Accept: application/json
+{
+    "name": "test-group",
+    "domain": "test",
+    "scopes": ["test-scope"]
+}
 < 201
 
 Add an array of scopes to a users group.
