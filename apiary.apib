@@ -558,7 +558,7 @@ All user tokens with id are delete, but all user refresh tokens are not deleted
 |----|-----------|----|
 |401  |unauthorized|if the access_token is not associated with any user.
 
-DELETE /user/{id}/sessions
+DELETE /user/{id}/session
 > Accept: application/json
 < 204
 
@@ -575,7 +575,7 @@ All user tokens are delete, but all user refresh tokens are not deleted
 |----|-----------|----|
 |401  |unauthorized|if the access_token is not associated with any user.
 
-DELETE /user/me/sessions
+DELETE /user/me/session
 > Accept: application/json
 < 204
 
